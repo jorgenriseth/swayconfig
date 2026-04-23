@@ -13,20 +13,18 @@ exec swayidle -w \
     resume 'swaymsg "output * dpms on"' \
     before-sleep 'swaylock -f'
 
-# Tray applets
-# nm-applet requires --indicator flag on Wayland
+# Status bar (waybar replaces the sway bar block; config in sway/waybar/)
+exec waybar
+# Notification daemon
+exec mako
+# nm-applet handles connection prompts and VPN authentication (waybar shows network status)
 exec nm-applet --indicator
-# blueman-applet has inconsistent Wayland support; may fall back to XWayland
-exec blueman-applet
-# flameshot has partial Wayland support; see $mod+p binding below for alternatives
-exec flameshot
 
-# Use pactl to adjust volume in PulseAudio.
-set $refresh_i3status killall -SIGUSR1 i3status
-bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
-bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
-bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
-bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+# Volume control via wpctl (PipeWire-native; waybar wireplumber module updates automatically)
+bindsym XF86AudioRaiseVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%+
+bindsym XF86AudioLowerVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%-
+bindsym XF86AudioMute exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+bindsym XF86AudioMicMute exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 # 'normal' keyword is required in sway (was implicit in i3)
@@ -42,11 +40,7 @@ bindsym $mod+Return exec foot
 bindsym $mod+Shift+q kill
 
 # app launcher
-# dmenu_run is X11-only; using bemenu-run (Wayland-native dmenu clone)
-# Note: bemenu font argument syntax may need adjustment for your font setup
-bindsym $mod+d exec bemenu-run --fn 'terminus-font normal 24'
-# Alternative: wofi
-# bindsym $mod+d exec wofi --show run
+bindsym $mod+d exec fuzzel
 
 # change focus
 bindsym $mod+h focus left
@@ -166,10 +160,8 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 
-# Start sway bar with i3status (i3status is compatible with sway's bar)
-bar {
-    status_command i3status
-}
+# Bar is handled by waybar (launched in exec section above)
+# See sway/waybar/config and sway/waybar/style.css
 
 # Keyboard layout toggle
 # kb_toggle.sh used setxkbmap (X11-only). In sway, configure layouts in an input
@@ -190,8 +182,8 @@ bindsym $mod+space exec swaymsg input type:keyboard xkb_switch_layout next
 bindsym Control+Shift+$alt+space exec swaymsg input type:keyboard xkb_options ctrl:swapcaps
 
 # Adjust backlight
-bindsym XF86MonBrightnessDown exec light -T 0.9
-bindsym XF86MonBrightnessUp exec light -T 1.1
+bindsym XF86MonBrightnessDown exec brightnessctl set 10%-
+bindsym XF86MonBrightnessUp exec brightnessctl set 10%+
 
 # Shutdown mode (i3exit replaced with direct swaymsg/systemctl calls)
 set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
@@ -221,11 +213,8 @@ bindsym $mod+m [class="tidal-hifi"] scratchpad show
 exec slack
 exec sleep 2 && swaymsg "[class=\"Slack\"] move scratchpad"
 
-# Screenshots
-# flameshot has partial Wayland support and may not work correctly.
-# Native Wayland alternative using grim + slurp:
-# bindsym $mod+p exec grim -g "$(slurp)" ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png
-bindsym $mod+p exec flameshot gui
+# Screenshots: grim captures, slurp selects region, swappy annotates
+bindsym $mod+p exec grim -g "$(slurp)" - | swappy -f -
 
 # Allow popups in fullscreen
 popup_during_fullscreen smart
