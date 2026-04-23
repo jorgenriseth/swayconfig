@@ -14,12 +14,19 @@ sudo apt install \
     fuzzel \
     grim \
     slurp \
-    swappy \
     brightnessctl \
     pavucontrol \
     foot \
     blueman \
     network-manager-gnome
+```
+
+`swappy` (screenshot annotation) is not packaged for Ubuntu 24.04 and must be built from source:
+
+```bash
+sudo apt install meson ninja-build libgtk-3-dev libcairo2-dev libpango1.0-dev
+git clone https://github.com/jtheoof/swappy.git && cd swappy
+meson build && ninja -C build && sudo ninja -C build install
 ```
 
 ## Symlink config files
@@ -58,8 +65,22 @@ Update the `workspace N output` lines in `sway/swayconfig` if needed.
 
 ### NVIDIA GPU (if applicable)
 
-Sway with NVIDIA requires extra environment variables. Create
-`~/.config/environment.d/sway-nvidia.conf`:
+Sway refuses to start with NVIDIA proprietary drivers unless launched with `--unsupported-gpu`.
+Without this, sway exits immediately and the login screen reappears. Override the session launcher:
+
+```bash
+mkdir -p ~/.local/share/wayland-sessions
+cat > ~/.local/share/wayland-sessions/sway.desktop << 'EOF'
+[Desktop Entry]
+Name=Sway
+Comment=An i3-compatible Wayland compositor
+Exec=sway --unsupported-gpu
+Type=Application
+DesktopNames=sway
+EOF
+```
+
+Also create `~/.config/environment.d/sway-nvidia.conf` with the required environment variables:
 
 ```
 LIBVA_DRIVER_NAME=nvidia

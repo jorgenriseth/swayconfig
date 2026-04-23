@@ -5,6 +5,12 @@ set $ctrl Control
 #font pango:FiraCode Nerd Font Mono 10
 font pango:DejaVuSansM Nerd Font 10
 
+# Export sway/Wayland environment to systemd user session and D-Bus.
+# Required for xdg-desktop-portal-wlr (and other user services) to find the compositor.
+# exec_always so this also runs on swaymsg reload.
+exec_always systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP SWAYSOCK
+exec_always dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway SWAYSOCK
+
 # Idle management and screen locking (replaces xss-lock + i3lock, which are X11-only)
 # Requires: swayidle, swaylock
 exec swayidle -w \
@@ -214,7 +220,7 @@ exec slack
 exec sleep 2 && swaymsg "[class=\"Slack\"] move scratchpad"
 
 # Screenshots: grim captures, slurp selects region, swappy annotates
-bindsym $mod+p exec grim -g "$(slurp)" - | swappy -f -
+# bindsym $mod+p exec grim -g "$(slurp)" - | swappy -f -
 
 # Allow popups in fullscreen
 popup_during_fullscreen smart
@@ -228,11 +234,10 @@ popup_during_fullscreen smart
 
 exec_always /usr/bin/1password --silent
 
+# Dynamically assign workspaces to outputs (mirrors i3/i3config-workspace-config.sh logic).
+# Workspaces 1-5 go to external monitors when present; 6-10 always on eDP-*.
+# Run at startup and on reload via exec_always.
+exec_always $HOME/software/swayconfig/sway/sway-workspace-config.sh
+
 ### Dynamic workspace to output mappings
-# Verify output names match your system with: swaymsg -t get_outputs
-workspace 6 output eDP-1
-workspace 7 output eDP-1
-workspace 8 output eDP-1
-workspace 9 output eDP-1
-workspace 10 output eDP-1
 ### End dynamic section
