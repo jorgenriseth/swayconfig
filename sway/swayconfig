@@ -9,7 +9,7 @@ font pango:DejaVuSansM Nerd Font 10
 # Required for xdg-desktop-portal-wlr (and other user services) to find the compositor.
 # exec_always so this also runs on swaymsg reload.
 exec_always systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP SWAYSOCK
-exec_always dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway SWAYSOCK
+exec_always dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway SWAYSOCK XCURSOR_THEME=Adwaita XCURSOR_SIZE=24
 
 # Idle management and screen locking (replaces xss-lock + i3lock, which are X11-only)
 # Requires: swayidle, swaylock
@@ -31,6 +31,9 @@ bindsym XF86AudioRaiseVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%+
 bindsym XF86AudioLowerVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%-
 bindsym XF86AudioMute exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
 bindsym XF86AudioMicMute exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+
+# Cursor theme for both native Wayland clients and XWayland
+seat seat0 xcursor_theme Adwaita 24
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 # 'normal' keyword is required in sway (was implicit in i3)
