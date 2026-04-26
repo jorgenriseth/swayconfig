@@ -1,4 +1,0 @@
-! Legacy X11 resource settings.
-! Wayland-native clients such as foot do not read this file.
-
-Xft.dpi: 192
