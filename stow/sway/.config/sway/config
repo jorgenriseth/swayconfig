@@ -19,7 +19,7 @@ exec swayidle -w \
     resume 'swaymsg "output * dpms on"' \
     before-sleep 'swaylock -f'
 
-# Status bar (waybar replaces the sway bar block; config in sway/waybar/)
+# Status bar (waybar replaces the sway bar block; config in ~/.config/waybar/)
 exec waybar
 # Notification daemon
 exec mako
@@ -41,8 +41,7 @@ floating_modifier $mod normal
 floating_minimum_size 100 x 50
 floating_maximum_size 1600 x 900
 
-# start a terminal
-# i3-sensible-terminal is X11-only; using foot (native Wayland)
+# Start a terminal.
 bindsym $mod+Return exec foot
 
 # kill focused window
@@ -170,7 +169,7 @@ mode "resize" {
 bindsym $mod+r mode "resize"
 
 # Bar is handled by waybar (launched in exec section above)
-# See sway/waybar/config and sway/waybar/style.css
+# See ~/.config/waybar/config and ~/.config/waybar/style.css.
 
 # Keyboard layout toggle
 # kb_toggle.sh used setxkbmap (X11-only). In sway, configure layouts in an input
@@ -234,10 +233,10 @@ popup_during_fullscreen smart
 
 exec_always /usr/bin/1password --silent
 
-# Dynamically assign workspaces to outputs (mirrors i3/i3config-workspace-config.sh logic).
+# Dynamically assign workspaces to outputs (mirrors the legacy i3 logic).
 # Workspaces 1-5 go to external monitors when present; 6-10 always on eDP-*.
 # Run at startup and on reload via exec_always.
-exec_always $HOME/software/swayconfig/sway/sway-workspace-config.sh
+exec_always $HOME/.config/sway/sway-workspace-config.sh
 
 ### Dynamic workspace to output mappings
 ### End dynamic section

@@ -1,11 +1,24 @@
 # swayconfig
 
-Sway window manager configuration, migrated from i3.
+Sway and shell dotfiles, now mirrored into a GNU Stow-compatible package layout.
+
+The new packages live under `stow/`. The pre-stow layout is still present during migration so you can sync this repo with your other dotfiles repo before actually linking anything into `$HOME`.
+
+## Package layout
+
+- `stow/shell`: `.bashrc`, `.profile`
+- `stow/environment`: `~/.config/environment.d` session defaults for Wayland apps
+- `stow/foot`: `~/.config/foot/foot.ini` and theme snippets
+- `stow/sway`: `~/.config/sway/config` and helper script
+- `stow/waybar`: `~/.config/waybar/config` and `style.css`
+- `stow/i3`: legacy X11/i3 package
+- `stow/x11`: legacy `.xinitrc` and `.Xresources`
 
 ## Install packages
 
 ```bash
 sudo apt install \
+    stow \
     sway \
     swayidle \
     swaylock \
@@ -21,6 +34,8 @@ sudo apt install \
     network-manager-gnome
 ```
 
+If your distro ships `foot-themes`, it is optional now because this repo includes a local foot theme.
+
 `swappy` (screenshot annotation) is not packaged for Ubuntu 24.04 and must be built from source:
 
 ```bash
@@ -29,22 +44,53 @@ git clone https://github.com/jtheoof/swappy.git && cd swappy
 meson build && ninja -C build && sudo ninja -C build install
 ```
 
-## Symlink config files
+## Install with GNU Stow
+
+Do not run these until you are ready to link this repo into your home directory.
+
+Preview the changes first:
 
 ```bash
-mkdir -p ~/.config/sway ~/.config/waybar
-
-ln -s ~/software/swayconfig/sway/swayconfig ~/.config/sway/config
-ln -s ~/software/swayconfig/sway/waybar      ~/.config/waybar
+stow -nv -d stow -t "$HOME" shell environment foot sway waybar
 ```
+
+If you also want the legacy X11/i3 files available:
+
+```bash
+stow -nv -d stow -t "$HOME" i3 x11
+```
+
+When you are ready to install for real:
+
+```bash
+stow -v -d stow -t "$HOME" shell environment foot sway waybar
+```
+
+Legacy X11/i3 packages remain optional:
+
+```bash
+stow -v -d stow -t "$HOME" i3 x11
+```
+
+To remove packages later:
+
+```bash
+stow -D -d stow -t "$HOME" shell environment foot sway waybar
+```
+
+## Notes on migrated settings
+
+- `~/.config/foot/foot.ini` now carries the terminal appearance that used to be split between GNOME Terminal profile settings and X11 DPI assumptions.
+- `~/.config/environment.d/10-wayland-apps.conf` is the session-wide home for Wayland app environment variables; this replaces putting those exports in `.profile`.
+- `.Xresources` and `.xinitrc` are retained only for the optional legacy X11 package.
 
 ## First-boot checklist
 
 ### Keyboard layout
 
-Edit `sway/swayconfig` and fill in the `input type:keyboard` block with your layouts:
+Edit `stow/sway/.config/sway/config` and fill in the `input type:keyboard` block with your layouts:
 
-```
+```conf
 input type:keyboard {
     xkb_layout "us,no"
     xkb_options "grp:win_space_toggle"
@@ -55,13 +101,11 @@ input type:keyboard {
 
 ### Verify output names
 
-Workspace 6–10 are pinned to `eDP-1`. Confirm the name matches your hardware after first boot:
+The workspace helper assigns workspaces 1-5 to external displays and 6-10 to the internal `eDP-*` display. Confirm the names after first boot:
 
 ```bash
 swaymsg -t get_outputs
 ```
-
-Update the `workspace N output` lines in `sway/swayconfig` if needed.
 
 ### NVIDIA GPU (if applicable)
 
@@ -82,7 +126,7 @@ EOF
 
 Also create `~/.config/environment.d/sway-nvidia.conf` with the required environment variables:
 
-```
+```conf
 LIBVA_DRIVER_NAME=nvidia
 WLR_NO_HARDWARE_CURSORS=1
 GBM_BACKEND=nvidia-drm
@@ -96,11 +140,11 @@ See the [Arch Wiki — sway/NVIDIA](https://wiki.archlinux.org/title/sway#NVIDIA
 Both apps run via XWayland by default, so `class=` window criteria work as-is.
 To run them as native Wayland apps, launch with:
 
-```
+```bash
 --enable-features=UseOzonePlatform --ozone-platform=wayland
 ```
 
-and change the scratchpad bindings from `class=` to `app_id=` in `sway/swayconfig`.
+and change the scratchpad bindings from `class=` to `app_id=` in `stow/sway/.config/sway/config`.
 
 ## Key bindings (changes from i3)
 
