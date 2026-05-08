@@ -3,7 +3,7 @@ set $alt Mod1
 set $mod Mod4
 set $ctrl Control
 #font pango:FiraCode Nerd Font Mono 10
-font pango:DejaVuSansM Nerd Font 10
+font pango:DejaVuSansM Nerd Font 14
 
 # Export sway/Wayland environment to systemd user session and D-Bus.
 # Required for xdg-desktop-portal-wlr (and other user services) to find the compositor.
@@ -16,8 +16,9 @@ exec_always dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CUR
 exec swayidle -w \
     timeout 300 'swaylock -f' \
     timeout 600 'swaymsg "output * dpms off"' \
-    resume 'swaymsg "output * dpms on"' \
-    before-sleep 'swaylock -f'
+    resume 'swaymsg output eDP-1 enable; swaymsg "output * dpms on"' \
+    before-sleep 'swaylock -f' \
+    after-resume 'swaymsg output eDP-1 enable; sleep 1; swaymsg "output * dpms on"'
 
 # Status bar (waybar replaces the sway bar block; config in sway/waybar/)
 exec waybar
@@ -50,6 +51,9 @@ bindsym $mod+Shift+q kill
 
 # app launcher
 bindsym $mod+d exec fuzzel
+
+# 1password quick access (Wayland workaround; 1password's built-in shortcut doesn't work under Wayland)
+bindsym $ctrl+Shift+space exec 1password --quick-access
 
 # change focus
 bindsym $mod+h focus left
