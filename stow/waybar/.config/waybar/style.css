@@ -28,14 +28,14 @@ window#waybar {
 }
 
 #workspaces button.visible {
-    color: #a6e3a1;
-    border-bottom: 2px solid #a6e3a1;
+    color: #89b4fa;
+    border-bottom: 2px solid #89b4fa;
 }
 
 #workspaces button.focused,
 #workspaces button.active {
-    color: #89b4fa;
-    border-bottom: 2px solid #89b4fa;
+    color: #a6e3a1;
+    border-bottom: 2px solid #a6e3a1;
 }
 
 #workspaces button.urgent {
