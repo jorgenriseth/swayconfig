@@ -1,0 +1,24 @@
+# kanshi output profiles — automatically applies monitor layout on connect/disconnect.
+# Use `kanshictl switch <profile>` to manually switch between profiles that have the
+# same set of connected outputs (e.g. same monitors but laptop on different side).
+
+profile laptop_only {
+    output "Sharp Corporation 0x14D0 Unknown" enable position 0,0
+    exec $HOME/software/swayconfig/sway/sway-workspace-config.sh laptop_only
+}
+
+# Sensio-M4: two Lenovo P27h-28 externals + laptop screen.
+#   V90DFW2V → left external  (workspaces 1-4)
+#   V90DFVTC → right external (workspaces 5-7)
+#   eDP-1    → laptop, right of both externals (workspaces 8-10)
+# Positions assume 2560x1440 for each external; adjust if resolutions differ.
+# To put the laptop on the left instead, change positions to:
+#   eDP-1:   position 0,0
+#   V90DFW2V: position <laptop_width>,0
+#   V90DFVTC: position <laptop_width+2560>,0
+profile Sensio-M4 {
+    output "Lenovo Group Limited P27h-28 V90DFW2V" enable position 0,0
+    output "Lenovo Group Limited P27h-28 V90DFVTC" enable position 2560,0
+    output "Sharp Corporation 0x14D0 Unknown" enable position 5120,0
+    exec $HOME/software/swayconfig/sway/sway-workspace-config.sh Sensio-M4
+}

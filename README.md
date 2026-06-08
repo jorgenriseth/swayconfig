@@ -99,13 +99,44 @@ input type:keyboard {
 
 `$mod+Space` cycles through the configured layouts. `Ctrl+Shift+Alt+Space` toggles `ctrl:swapcaps`.
 
-### Verify output names
+### Monitor layout and workspace assignment (kanshi)
 
-The workspace helper assigns workspaces 1-5 to external displays and 6-10 to the internal `eDP-*` display. Confirm the names after first boot:
+Output arrangement and workspace-to-monitor assignment is managed by [kanshi](https://sr.ht/~emersion/kanshi/), which identifies monitors by make/model/serial rather than port name (e.g. `DP-1` changes across boots; serial numbers don't).
+
+Install:
 
 ```bash
-swaymsg -t get_outputs
+sudo apt install kanshi   # Debian/Ubuntu
+sudo pacman -S kanshi     # Arch
 ```
+
+sway launches kanshi as a daemon (`exec kanshi`). On each display connect/disconnect event, kanshi matches the active set of monitors against a profile in `~/.config/kanshi/config` (symlinked from `stow/sway/.config/kanshi/config`). The matching profile runs `sway-workspace-config.sh <profile>`, which writes `~/.config/sway/workspace-outputs.conf` and triggers `swaymsg reload`. sway includes that file on every reload to apply the workspace assignments.
+
+#### Defined profiles
+
+| Profile | Monitors | Workspace assignment |
+|---|---|---|
+| `laptop_only` | eDP-1 only | no fixed assignments |
+| `Sensio-M4` | 2× Lenovo P27h-28 + eDP-1 | 1–4 left external · 5–7 right external · 8–10 eDP-1 |
+
+#### Adding a new office/location
+
+1. Connect the monitors and run:
+   ```bash
+   swaymsg -t get_outputs | jq '.[] | {name, make, model, serial}'
+   ```
+2. Add a profile block to `stow/sway/.config/kanshi/config`.
+3. Add a matching `case` entry to `stow/sway/.config/sway/sway-workspace-config.sh`.
+
+If two locations share the same set of monitors but with the laptop on different sides, define two profiles with the same outputs but different `position` values. Switch between them manually with:
+
+```bash
+kanshictl switch <profile>
+```
+
+or bind the command to a key in `swayconfig`.
+
+#### Verify output names
 
 ### NVIDIA GPU (if applicable)
 

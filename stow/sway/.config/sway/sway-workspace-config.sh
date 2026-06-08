@@ -1,37 +1,33 @@
 #!/usr/bin/env bash
-# Dynamically assign workspace-to-output mappings in the sway config.
+# Write workspace-to-output mappings for a kanshi profile and reload sway.
+# Called by kanshi's exec directive on profile activation.
+# Usage: sway-workspace-config.sh <profile_name>
 
-CONFIG_FILE="$HOME/.config/sway/config"
-DYNAMIC_SECTION_START="### Dynamic workspace to output mappings"
-DYNAMIC_SECTION_END="### End dynamic section"
+PROFILE="${1:-laptop_only}"
+OUTPUT_FILE="$HOME/.config/sway/workspace-outputs.conf"
 
-# Resolve symlink to get the real file path so reloads update the source file.
-REAL_CONFIG=$(readlink -f "$CONFIG_FILE")
+case "$PROFILE" in
+    Sensio-M4)
+        # 1-4 → left external (V90DFW2V)
+        # 5-7 → right external (V90DFVTC)
+        # 8-10 → laptop (eDP-1)
+        cat > "$OUTPUT_FILE" << 'EOF'
+workspace 1 output "Lenovo Group Limited P27h-28 V90DFW2V"
+workspace 2 output "Lenovo Group Limited P27h-28 V90DFW2V"
+workspace 3 output "Lenovo Group Limited P27h-28 V90DFW2V"
+workspace 4 output "Lenovo Group Limited P27h-28 V90DFW2V"
+workspace 5 output "Lenovo Group Limited P27h-28 V90DFVTC"
+workspace 6 output "Lenovo Group Limited P27h-28 V90DFVTC"
+workspace 7 output "Lenovo Group Limited P27h-28 V90DFVTC"
+workspace 8 output "Sharp Corporation 0x14D0"
+workspace 9 output "Sharp Corporation 0x14D0"
+workspace 10 output "Sharp Corporation 0x14D0"
+EOF
+        ;;
+    laptop_only|*)
+        # No workspace-to-output assignments; sway handles placement automatically.
+        : > "$OUTPUT_FILE"
+        ;;
+esac
 
-INTERNAL=$(swaymsg -t get_outputs | grep -o '"name": "[^"]*"' | grep -o '[^"]*$' | grep '^eDP' | head -1)
-EXTERNAL=$(swaymsg -t get_outputs | grep -o '"name": "[^"]*"' | grep -o '[^"]*$' | grep -v '^eDP' | xargs)
-
-TEMP_CONFIG=$(mktemp)
-cp "$REAL_CONFIG" "$TEMP_CONFIG"
-
-sed -i "/$DYNAMIC_SECTION_START/,/$DYNAMIC_SECTION_END/d" "$TEMP_CONFIG"
-
-echo "$DYNAMIC_SECTION_START" >> "$TEMP_CONFIG"
-if [ -n "$EXTERNAL" ]; then
-    for idx in {1..5}; do
-        echo "workspace $idx output $EXTERNAL" >> "$TEMP_CONFIG"
-    done
-fi
-if [ -n "$INTERNAL" ]; then
-    for idx in {6..10}; do
-        echo "workspace $idx output $INTERNAL" >> "$TEMP_CONFIG"
-    done
-fi
-echo "$DYNAMIC_SECTION_END" >> "$TEMP_CONFIG"
-
-if ! diff -q "$REAL_CONFIG" "$TEMP_CONFIG" > /dev/null; then
-    mv "$TEMP_CONFIG" "$REAL_CONFIG"
-    swaymsg reload
-else
-    rm "$TEMP_CONFIG"
-fi
+swaymsg reload

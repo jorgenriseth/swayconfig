@@ -238,10 +238,13 @@ popup_during_fullscreen smart
 
 exec_always /usr/bin/1password --silent
 
-# Dynamically assign workspaces to outputs (mirrors i3/i3config-workspace-config.sh logic).
-# Workspaces 1-5 go to external monitors when present; 6-10 always on eDP-*.
-# Run at startup and on reload via exec_always.
-exec_always $HOME/software/swayconfig/sway/sway-workspace-config.sh
+# kanshi watches for output connect/disconnect events and applies the matching profile.
+# On activation, kanshi calls sway-workspace-config.sh which writes
+# ~/.config/sway/workspace-outputs.conf and triggers a sway reload.
+# Use `kanshictl switch <profile>` to manually switch profiles with the same output set
+# (e.g. same monitors but laptop repositioned).
+exec kanshi
 
-### Dynamic workspace to output mappings
-### End dynamic section
+# Workspace-to-output assignments written by sway-workspace-config.sh via kanshi.
+# File is created on first profile activation; sway silently skips it if missing.
+include ~/.config/sway/workspace-outputs.conf
