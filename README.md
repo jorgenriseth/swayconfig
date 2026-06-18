@@ -128,13 +128,15 @@ sway launches kanshi as a daemon (`exec kanshi`). On each display connect/discon
 2. Add a profile block to `stow/sway/.config/kanshi/config`.
 3. Add a matching `case` entry to `stow/sway/.config/sway/sway-workspace-config.sh`.
 
-If two locations share the same set of monitors but with the laptop on different sides, define two profiles with the same outputs but different `position` values. Switch between them manually with:
+If two locations share the same set of monitors but with the laptop on different sides, define two profiles with the same outputs but different `position` values. Since Ubuntu 24.10 ships kanshi 1.5.x (which predates `kanshictl`), position switching is handled by `sway/toggle-Sensio-M4-laptop-position.sh`, which uses `swaymsg output` directly and is bound to `$mod+F8`. No `kanshictl` is required.
+
+Once kanshi 1.6.0+ is available (Ubuntu 26.04+), the toggle script can be replaced with:
 
 ```bash
 kanshictl switch <profile>
 ```
 
-or bind the command to a key in `swayconfig`.
+or bound to a key in `swayconfig`.
 
 #### Verify output names
 
@@ -192,3 +194,4 @@ and change the scratchpad bindings from `class=` to `app_id=` in `stow/sway/.con
 | System mode | `Ctrl+Alt+Delete` |
 | Slack scratchpad | `$mod+BackSpace` |
 | Tidal scratchpad | `$mod+M` |
+| Toggle laptop position | `$mod+F8` |

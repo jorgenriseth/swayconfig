@@ -241,9 +241,11 @@ exec_always /usr/bin/1password --silent
 # kanshi watches for output connect/disconnect events and applies the matching profile.
 # On activation, kanshi calls sway-workspace-config.sh which writes
 # ~/.config/sway/workspace-outputs.conf and triggers a sway reload.
-# Use `kanshictl switch <profile>` to manually switch profiles with the same output set
-# (e.g. same monitors but laptop repositioned).
 exec kanshi
+
+# Toggle laptop screen between left and right of external monitors (Sensio-M4 profile).
+# Uses swaymsg output positioning directly; kanshictl is not required.
+bindsym $mod+F8 exec $HOME/software/swayconfig/sway/toggle-Sensio-M4-laptop-position.sh
 
 # Workspace-to-output assignments written by sway-workspace-config.sh via kanshi.
 # File is created on first profile activation; sway silently skips it if missing.
