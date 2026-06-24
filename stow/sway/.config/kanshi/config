@@ -22,3 +22,9 @@ profile Sensio-M4 {
     output "Sharp Corporation 0x14D0 Unknown" enable position 5120,0
     exec $HOME/software/swayconfig/sway/sway-workspace-config.sh Sensio-M4
 }
+
+profile Curved-GAG {
+    output "Sharp Corporation 0x14D0 Unknown" enable position 0,0
+    output "Samsung Electric Company C34H89x H4ZT803398" enable 1920,0
+    exec $HOME/software/swayconfig/sway/sway-workspace-config.sh Curved-GAG
+}
