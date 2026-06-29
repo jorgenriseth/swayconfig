@@ -3,7 +3,7 @@ set $alt Mod1
 set $mod Mod4
 set $ctrl Control
 #font pango:FiraCode Nerd Font Mono 10
-font pango:DejaVuSansM Nerd Font 10
+font pango:DejaVuSansM Nerd Font 14
 
 # Export sway/Wayland environment to systemd user session and D-Bus.
 # Required for xdg-desktop-portal-wlr (and other user services) to find the compositor.
@@ -16,8 +16,9 @@ exec_always dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CUR
 exec swayidle -w \
     timeout 300 'swaylock -f' \
     timeout 600 'swaymsg "output * dpms off"' \
-    resume 'swaymsg "output * dpms on"' \
-    before-sleep 'swaylock -f'
+    resume 'swaymsg "output * dpms on"; pkill kanshi; swaymsg exec kanshi' \
+    before-sleep 'swaylock -f' \
+    after-resume 'sleep 1; swaymsg "output * dpms on"; pkill kanshi; swaymsg exec kanshi'
 
 # Status bar (waybar replaces the sway bar block; config in ~/.config/waybar/)
 exec waybar
@@ -49,6 +50,9 @@ bindsym $mod+Shift+q kill
 
 # app launcher
 bindsym $mod+d exec fuzzel
+
+# 1password quick access (Wayland workaround; 1password's built-in shortcut doesn't work under Wayland)
+bindsym $ctrl+Shift+space exec 1password --quick-access
 
 # change focus
 bindsym $mod+h focus left
@@ -233,10 +237,16 @@ popup_during_fullscreen smart
 
 exec_always /usr/bin/1password --silent
 
-# Dynamically assign workspaces to outputs (mirrors the legacy i3 logic).
-# Workspaces 1-5 go to external monitors when present; 6-10 always on eDP-*.
-# Run at startup and on reload via exec_always.
-exec_always $HOME/.config/sway/sway-workspace-config.sh
+# kanshi watches for output connect/disconnect events and applies the matching profile.
+# On activation, kanshi calls sway-workspace-config.sh which writes
+# ~/.config/sway/workspace-outputs.conf and triggers a sway reload.
+exec kanshi
+
+# Toggle which external monitor is on the left vs. right (Sensio-M4 profile).
+bindsym $mod+F8 exec $HOME/software/swayconfig/sway/toggle-Sensio-M4-laptop-position.sh
 
 ### Dynamic workspace to output mappings
+# Workspace-to-output assignments written by sway-workspace-config.sh via kanshi.
+# File is created on first profile activation; sway silently skips it if missing.
+include ~/.config/sway/workspace-outputs.conf
 ### End dynamic section
